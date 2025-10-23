@@ -8,31 +8,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchPokemonVariant(species, variant) {
-    try {
-      const res = await fetch(variant.pokemon.url);
-      const pokemon = await res.json();
+  try {
+    // Fetch Pokémon data
+    const res = await fetch(variant.pokemon.url);
+    const pokemon = await res.json();
 
-      // Detect regional form name
-      let displayName = capitalize(species.name);
-      if (variant.pokemon.name.includes("-")) {
-        const formName = variant.pokemon.name.split("-")[1];
-        const regionNames = {
-          alola: "Alolan",
-          galar: "Galarian",
-          hisui: "Hisuian",
-          paldea: "Paldean",
-        };
-        const region = regionNames[formName] || capitalize(formName);
-        displayName += ` (${region})`;
-      }
+    // Fetch its species data (important for display)
+    const speciesRes = await fetch(pokemon.species.url);
+    const speciesData = await speciesRes.json();
+    pokemon.species = speciesData;
 
-      pokemon.displayName = displayName;
-      return pokemon;
-    } catch (err) {
-      console.warn("Variant fetch error:", variant.pokemon.name, err);
-      return null;
+    // Detect regional form from name
+    let displayName = capitalize(species.name);
+    if (variant.pokemon.name.includes('-')) {
+      const formName = variant.pokemon.name.split('-')[1];
+      const regionNames = {
+        alola: 'Alolan',
+        galar: 'Galarian',
+        hisui: 'Hisuian',
+        paldea: 'Paldean',
+      };
+      const region = regionNames[formName] || capitalize(formName);
+      displayName += ` (${region})`;
     }
+
+    pokemon.displayName = displayName;
+    return pokemon;
+  } catch (err) {
+    console.warn('Variant fetch error:', variant.pokemon.name, err);
+    return null;
   }
+}
 
   function displayPokemon(pokemon) {
     const card = document.createElement("div");
