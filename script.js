@@ -36,36 +36,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadGeneration(genId) {
-  pokedex.innerHTML = 'Loading...';
+    pokedex.innerHTML = 'Loading...';
+    const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}/`);
+    const data = await res.json();
 
-  const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}/`);
-  const data = await res.json();
+    // data.pokemon_species is an array of species names
+    const speciesList = data.pokemon_species.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
 
-  // Fetch all species info in parallel
-  const speciesWithId = await Promise.all(
-    data.pokemon_species.map(async (species) => {
-      const res = await fetch(species.url);
-      const speciesData = await res.json();
-      return { name: species.name, id: speciesData.id };
-    })
-  );
+    pokedex.innerHTML = '';
 
-  // Sort by National Dex ID
-  speciesWithId.sort((a, b) => a.id - b.id);
-
-  pokedex.innerHTML = '';
-
-  // Now display them **sequentially in order**
-  for (const species of speciesWithId) {
-    try {
-      const pokemon = await fetchPokemonBySpecies(species.name);
-      displayPokemon(pokemon);
-    } catch (err) {
-      console.warn('Error loading', species.name, err);
+    for (const species of speciesList) {
+      try {
+        const pokemon = await fetchPokemonBySpecies(species.name);
+        displayPokemon(pokemon);
+      } catch (err) {
+        console.warn('Error loading', species.name, err);
+      }
     }
   }
-}
-  
+
   genList.addEventListener('click', (e) => {
     if (e.target.tagName === 'LI') {
       document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
