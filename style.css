@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap');
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Fredoka', sans-serif;
   background-color: #f6f8fa;
   color: #222;
   margin: 0;
