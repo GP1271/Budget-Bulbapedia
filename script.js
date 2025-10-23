@@ -109,18 +109,19 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
   genList.addEventListener('click', (e) => {
-    if (e.target.tagName === 'LI') {
-      document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
-      e.target.classList.add('active');
+  if (e.target.tagName === 'LI') {
+    // Highlight the clicked generation
+    document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
+    e.target.classList.add('active');
 
-      const genId = e.target.getAttribute('data-limit')
-  ? Array.from(genList.children).indexOf(e.target) + 1
-  : 1;
-loadGeneration(genId);
-      loadGeneration(genId);
-    }
-  });
+    // Get generation number from the HTML attribute
+    const genId = parseInt(e.target.getAttribute('data-gen'));
 
+    // Load that generation
+    loadGeneration(genId);
+  }
+});
+  
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.card').forEach(card => {
