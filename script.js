@@ -37,10 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadGeneration(genId) {
   pokedex.innerHTML = 'Loading...';
+
   const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}/`);
   const data = await res.json();
 
-  // Fetch species info first to get Dex ID
+  // Fetch all species info in parallel
   const speciesWithId = await Promise.all(
     data.pokemon_species.map(async (species) => {
       const res = await fetch(species.url);
@@ -49,12 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   );
 
-  // Sort by Dex ID
+  // Sort by National Dex ID
   speciesWithId.sort((a, b) => a.id - b.id);
 
   pokedex.innerHTML = '';
 
-  // Loop over the sorted list
+  // Now display them **sequentially in order**
   for (const species of speciesWithId) {
     try {
       const pokemon = await fetchPokemonBySpecies(species.name);
