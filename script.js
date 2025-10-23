@@ -1,6 +1,10 @@
 const pokedex = document.getElementById('pokedex');
 const searchInput = document.getElementById('search');
 
+function capitalize(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 async function fetchPokemon(id) {
   const url = `https://pokeapi.co/api/v2/pokemon/${id}`;
   const res = await fetch(url);
@@ -20,7 +24,7 @@ function displayPokemon(pokemon) {
   card.classList.add('card');
   card.innerHTML = `
     <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
-    <h3>${pokemon.name}</h3>
+    <h3>${capitalize(pokemon.name)}</h3>
     <p>ID: ${pokemon.id}</p>
     <p>Type: ${pokemon.types.map(t => t.type.name).join(', ')}</p>
   `;
