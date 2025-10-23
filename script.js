@@ -36,12 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadGeneration(genId) {
-    pokedex.innerHTML = '';
+    pokedex.innerHTML = 'Loading...';
     const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}/`);
     const data = await res.json();
 
     // data.pokemon_species is an array of species names
-    for (const species of data.pokemon_species) {
+    const speciesList = data.pokemon_species.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    pokedex.innerHTML = '';
+
+    for (const species of speciesList) {
       try {
         const pokemon = await fetchPokemonBySpecies(species.name);
         displayPokemon(pokemon);
@@ -51,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Sidebar click
   genList.addEventListener('click', (e) => {
     if (e.target.tagName === 'LI') {
       document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
@@ -62,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Search filter
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.card').forEach(card => {
@@ -71,6 +75,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Default: load Gen 1
   loadGeneration(1);
 });
