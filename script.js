@@ -42,21 +42,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const data = await res.json();
 
   // Fetch all species info in parallel
-  const speciesWithId = await Promise.all(
+  const speciesWithDex = await Promise.all(
     data.pokemon_species.map(async (species) => {
       const res = await fetch(species.url);
       const speciesData = await res.json();
-      return { name: species.name, id: speciesData.id };
+
+      // Get National Dex number
+      const nationalDex = speciesData.pokedex_numbers.find(p => p.pokedex.name === "national").entry_number;
+
+      return { name: species.name, dex: nationalDex };
     })
   );
 
-  // Sort by National Dex ID
-  speciesWithId.sort((a, b) => a.id - b.id);
+  // Sort by National Dex number
+  speciesWithDex.sort((a, b) => a.dex - b.dex);
 
   pokedex.innerHTML = '';
 
-  // Now display them **sequentially in order**
-  for (const species of speciesWithId) {
+  // Now display in proper order
+  for (const species of speciesWithDex) {
     try {
       const pokemon = await fetchPokemonBySpecies(species.name);
       displayPokemon(pokemon);
