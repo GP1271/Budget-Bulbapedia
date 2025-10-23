@@ -2,12 +2,12 @@ const pokedex = document.getElementById('pokedex');
 const searchInput = document.getElementById('search');
 const genList = document.getElementById('gen-list');
 
-// Capitalize function
+// Capitalize first letter
 function capitalize(name) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-// Fetch Pokémon + species (for title and variants)
+// Fetch Pokémon + species info
 async function fetchPokemon(id) {
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
   const data = await res.json();
@@ -18,14 +18,13 @@ async function fetchPokemon(id) {
   return { ...data, species: speciesData };
 }
 
-// Display each Pokémon card
+// Display a Pokémon card
 function displayPokemon(pokemon) {
   const card = document.createElement('div');
   card.classList.add('card');
 
   const title = pokemon.species.genera.find(g => g.language.name === "en")?.genus || "Pokémon";
 
-  // Check for regional variant
   const variantName = pokemon.name.includes('-')
     ? `(${pokemon.name.split('-')[1].replace(/^\w/, c => c.toUpperCase())} Form)`
     : "";
@@ -40,7 +39,7 @@ function displayPokemon(pokemon) {
   pokedex.appendChild(card);
 }
 
-// Load Pokémon in a range (with optional offset)
+// Load Pokémon within range
 async function loadPokedex(limit, offset) {
   pokedex.innerHTML = '';
   for (let i = offset + 1; i <= offset + limit; i++) {
@@ -53,16 +52,19 @@ async function loadPokedex(limit, offset) {
   }
 }
 
-// Sidebar click event — load specific generation
+// Generation click
 genList.addEventListener('click', (e) => {
   if (e.target.tagName === 'LI') {
+    document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
+    e.target.classList.add('active');
+
     const limit = parseInt(e.target.getAttribute('data-limit'));
     const offset = parseInt(e.target.getAttribute('data-offset'));
     loadPokedex(limit, offset);
   }
 });
 
-// Search function
+// Search
 searchInput.addEventListener('input', (e) => {
   const term = e.target.value.toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
