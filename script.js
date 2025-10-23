@@ -1,34 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
   const pokedex = document.getElementById('pokedex');
-  const searchInput = document.getElementById('search');
   const genList = document.getElementById('gen-list');
+  const searchInput = document.getElementById('search');
 
-  // Capitalize first letter
   function capitalize(name) {
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
-  // Fetch Pokémon + species info
-  async function fetchPokemon(id) {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+  async function fetchPokemonBySpecies(name) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
     const data = await res.json();
-
     const speciesRes = await fetch(data.species.url);
     const speciesData = await speciesRes.json();
-
     return { ...data, species: speciesData };
   }
 
-  // Display a Pokémon card
   function displayPokemon(pokemon) {
     const card = document.createElement('div');
     card.classList.add('card');
 
-    const title = pokemon.species.genera.find(g => g.language.name === "en")?.genus || "Pokémon";
+    const title = pokemon.species.genera.find(g => g.language.name === 'en')?.genus || 'Pokémon';
 
     const variantName = pokemon.name.includes('-')
       ? `(${pokemon.name.split('-')[1].replace(/^\w/, c => c.toUpperCase())} Form)`
-      : "";
+      : '';
 
     card.innerHTML = `
       <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
@@ -40,32 +35,34 @@ document.addEventListener('DOMContentLoaded', () => {
     pokedex.appendChild(card);
   }
 
-  // Load Pokémon within range
-  async function loadPokedex(limit, offset) {
+  async function loadGeneration(genId) {
     pokedex.innerHTML = '';
-    for (let i = offset + 1; i <= offset + limit; i++) {
+    const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}/`);
+    const data = await res.json();
+
+    // data.pokemon_species is an array of species names
+    for (const species of data.pokemon_species) {
       try {
-        const pokemon = await fetchPokemon(i);
+        const pokemon = await fetchPokemonBySpecies(species.name);
         displayPokemon(pokemon);
       } catch (err) {
-        console.warn("Error loading Pokémon", i, err);
+        console.warn('Error loading', species.name, err);
       }
     }
   }
 
-  // Generation click
+  // Sidebar click
   genList.addEventListener('click', (e) => {
     if (e.target.tagName === 'LI') {
       document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
       e.target.classList.add('active');
 
-      const limit = parseInt(e.target.getAttribute('data-limit'));
-      const offset = parseInt(e.target.getAttribute('data-offset'));
-      loadPokedex(limit, offset);
+      const genId = parseInt(e.target.getAttribute('data-gen'));
+      loadGeneration(genId);
     }
   });
 
-  // Search
+  // Search filter
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.card').forEach(card => {
@@ -75,5 +72,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Default: load Gen 1
-  loadPokedex(151, 0);
+  loadGeneration(1);
 });
