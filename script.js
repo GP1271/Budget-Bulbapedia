@@ -42,25 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const data = await res.json();
 
   // Fetch all species info in parallel
-  const speciesWithDex = await Promise.all(
+  const speciesWithId = await Promise.all(
     data.pokemon_species.map(async (species) => {
       const res = await fetch(species.url);
       const speciesData = await res.json();
-
-      // Get National Dex number
-      const nationalDex = speciesData.pokedex_numbers.find(p => p.pokedex.name === "national").entry_number;
-
-      return { name: species.name, dex: nationalDex };
+      return { name: species.name, id: speciesData.id };
     })
   );
 
-  // Sort by National Dex number
-  speciesWithDex.sort((a, b) => a.dex - b.dex);
+  // Sort by National Dex ID
+  speciesWithId.sort((a, b) => a.id - b.id);
 
   pokedex.innerHTML = '';
 
-  // Now display in proper order
-  for (const species of speciesWithDex) {
+  // Now display them **sequentially in order**
+  for (const species of speciesWithId) {
     try {
       const pokemon = await fetchPokemonBySpecies(species.name);
       displayPokemon(pokemon);
@@ -69,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 }
-
+  
   genList.addEventListener('click', (e) => {
     if (e.target.tagName === 'LI') {
       document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
