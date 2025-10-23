@@ -1,77 +1,79 @@
-const pokedex = document.getElementById('pokedex');
-const searchInput = document.getElementById('search');
-const genList = document.getElementById('gen-list');
+document.addEventListener('DOMContentLoaded', () => {
+  const pokedex = document.getElementById('pokedex');
+  const searchInput = document.getElementById('search');
+  const genList = document.getElementById('gen-list');
 
-// Capitalize first letter
-function capitalize(name) {
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
+  // Capitalize first letter
+  function capitalize(name) {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
 
-// Fetch Pokémon + species info
-async function fetchPokemon(id) {
-  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-  const data = await res.json();
+  // Fetch Pokémon + species info
+  async function fetchPokemon(id) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    const data = await res.json();
 
-  const speciesRes = await fetch(data.species.url);
-  const speciesData = await speciesRes.json();
+    const speciesRes = await fetch(data.species.url);
+    const speciesData = await speciesRes.json();
 
-  return { ...data, species: speciesData };
-}
+    return { ...data, species: speciesData };
+  }
 
-// Display a Pokémon card
-function displayPokemon(pokemon) {
-  const card = document.createElement('div');
-  card.classList.add('card');
+  // Display a Pokémon card
+  function displayPokemon(pokemon) {
+    const card = document.createElement('div');
+    card.classList.add('card');
 
-  const title = pokemon.species.genera.find(g => g.language.name === "en")?.genus || "Pokémon";
+    const title = pokemon.species.genera.find(g => g.language.name === "en")?.genus || "Pokémon";
 
-  const variantName = pokemon.name.includes('-')
-    ? `(${pokemon.name.split('-')[1].replace(/^\w/, c => c.toUpperCase())} Form)`
-    : "";
+    const variantName = pokemon.name.includes('-')
+      ? `(${pokemon.name.split('-')[1].replace(/^\w/, c => c.toUpperCase())} Form)`
+      : "";
 
-  card.innerHTML = `
-    <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
-    <h3>${capitalize(pokemon.species.name)} ${variantName}</h3>
-    <p class="title">${title}</p>
-    <p>ID: ${pokemon.id}</p>
-    <p>Type: ${pokemon.types.map(t => t.type.name).join(', ')}</p>
-  `;
-  pokedex.appendChild(card);
-}
+    card.innerHTML = `
+      <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+      <h3>${capitalize(pokemon.species.name)} ${variantName}</h3>
+      <p class="title">${title}</p>
+      <p>ID: ${pokemon.id}</p>
+      <p>Type: ${pokemon.types.map(t => t.type.name).join(', ')}</p>
+    `;
+    pokedex.appendChild(card);
+  }
 
-// Load Pokémon within range
-async function loadPokedex(limit, offset) {
-  pokedex.innerHTML = '';
-  for (let i = offset + 1; i <= offset + limit; i++) {
-    try {
-      const pokemon = await fetchPokemon(i);
-      displayPokemon(pokemon);
-    } catch (err) {
-      console.warn("Error loading Pokémon", i, err);
+  // Load Pokémon within range
+  async function loadPokedex(limit, offset) {
+    pokedex.innerHTML = '';
+    for (let i = offset + 1; i <= offset + limit; i++) {
+      try {
+        const pokemon = await fetchPokemon(i);
+        displayPokemon(pokemon);
+      } catch (err) {
+        console.warn("Error loading Pokémon", i, err);
+      }
     }
   }
-}
 
-// Generation click
-genList.addEventListener('click', (e) => {
-  if (e.target.tagName === 'LI') {
-    document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
-    e.target.classList.add('active');
+  // Generation click
+  genList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'LI') {
+      document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
+      e.target.classList.add('active');
 
-    const limit = parseInt(e.target.getAttribute('data-limit'));
-    const offset = parseInt(e.target.getAttribute('data-offset'));
-    loadPokedex(limit, offset);
-  }
-});
-
-// Search
-searchInput.addEventListener('input', (e) => {
-  const term = e.target.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const name = card.querySelector('h3').textContent.toLowerCase();
-    card.style.display = name.includes(term) ? 'block' : 'none';
+      const limit = parseInt(e.target.getAttribute('data-limit'));
+      const offset = parseInt(e.target.getAttribute('data-offset'));
+      loadPokedex(limit, offset);
+    }
   });
-});
 
-// Default: load Gen 1
-loadPokedex(151, 0);
+  // Search
+  searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.card').forEach(card => {
+      const name = card.querySelector('h3').textContent.toLowerCase();
+      card.style.display = name.includes(term) ? 'block' : 'none';
+    });
+  });
+
+  // Default: load Gen 1
+  loadPokedex(151, 0);
+});
