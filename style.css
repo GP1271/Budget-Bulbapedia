@@ -39,3 +39,10 @@ header {
   width: 150px;
   text-align: center;
 }
+
+.card .title {
+  font-style: italic;
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 5px;
+}
