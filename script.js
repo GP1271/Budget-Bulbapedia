@@ -113,7 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('#gen-list li').forEach(li => li.classList.remove('active'));
       e.target.classList.add('active');
 
-      const genId = parseInt(e.target.getAttribute('data-gen'));
+      const genId = e.target.getAttribute('data-limit')
+  ? Array.from(genList.children).indexOf(e.target) + 1
+  : 1;
+loadGeneration(genId);
       loadGeneration(genId);
     }
   });
